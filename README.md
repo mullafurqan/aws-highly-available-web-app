@@ -325,10 +325,8 @@ aws-highly-available-web-app
 │
 ├── README.md
 ├── index.html
-│
-└── images
-    ├── architecture-diagram.png
-    └── vpc-resource-map.png
+├── architecture-diagram.png.png
+└── vpc-resource-map.png.png
 ```
 
 ---
