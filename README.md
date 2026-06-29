@@ -9,7 +9,7 @@ This project demonstrates how to deploy a **Highly Available Web Application** o
 ## 🏗️ Architecture Diagram
 
 <p align="center">
-<img src="images/architecture-diagram.png" width="100%">
+<img src="architecture-diagram.png" width="100%">
 </p>
 
 ---
@@ -26,7 +26,7 @@ The project uses a custom VPC with:
 - Route Tables
 
 <p align="center">
-<img src="images/vpc-resource-map.png" width="100%">
+<img src="vpc-resource-map.png" width="100%">
 </p>
 
 ---
