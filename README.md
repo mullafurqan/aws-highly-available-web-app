@@ -1,14 +1,54 @@
-# aws-highly-available-web-app
-Built a highly available web application on AWS using a custom VPC, EC2 Auto Scaling Group, Application Load Balancer, Bastion Host, NAT Gateway, and private/public subnets across multiple Availability Zones.
 # AWS Highly Available Web Application using Auto Scaling & Application Load Balancer
 
-## 📖 Overview
+## 📌 Project Overview
 
-This project demonstrates the deployment of a highly available web application on AWS using a custom VPC architecture. The application runs on EC2 instances in private subnets, while an Application Load Balancer (ALB) distributes incoming traffic. Auto Scaling ensures high availability by automatically replacing unhealthy instances and scaling based on demand. A Bastion Host is used to securely access the private EC2 instances.
+This project demonstrates how to deploy a **Highly Available Web Application** on AWS using a custom VPC architecture. The application is hosted on EC2 instances running in **private subnets**, while an **Application Load Balancer (ALB)** distributes incoming traffic across multiple Availability Zones. A **Bastion Host** provides secure SSH access to the private EC2 instances, and an **Auto Scaling Group** ensures high availability and fault tolerance.
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Architecture Diagram
+
+<p align="center">
+<img src="images/architecture-diagram.png" width="100%">
+</p>
+
+---
+
+## 🌐 VPC Resource Map
+
+The project uses a custom VPC with:
+
+- 2 Availability Zones
+- 2 Public Subnets
+- 2 Private Subnets
+- Internet Gateway
+- NAT Gateways
+- Route Tables
+
+<p align="center">
+<img src="images/vpc-resource-map.png" width="100%">
+</p>
+
+---
+
+# 🚀 AWS Services Used
+
+- Amazon VPC
+- Public & Private Subnets
+- Internet Gateway
+- NAT Gateway
+- Route Tables
+- Security Groups
+- EC2
+- Bastion Host
+- Launch Template
+- Auto Scaling Group
+- Application Load Balancer
+- Target Group
+
+---
+
+# 📐 Architecture
 
 ```text
                     Internet
@@ -17,124 +57,107 @@ This project demonstrates the deployment of a highly available web application o
                         │
         ┌──────────────────────────┐
         │ Application Load Balancer│
-        │      (Public Subnets)    │
+        │        (Public)          │
         └─────────────┬────────────┘
                       │
-                Target Group
-                HTTP : 8000
+               Target Group (8000)
                       │
-        ┌─────────────┴─────────────┐
-        │                           │
-  EC2 Instance                 EC2 Instance
- Private Subnet               Private Subnet
-     AZ-1                        AZ-2
-        │                           │
- Python HTTP Server          Python HTTP Server
-      Port 8000                 Port 8000
-        │                           │
-        └────── Auto Scaling Group ──────┘
+      ┌───────────────┴───────────────┐
+      │                               │
+ EC2 Instance 1                  EC2 Instance 2
+ Private Subnet                  Private Subnet
+      │                               │
+ Python HTTP Server             Python HTTP Server
+      │                               │
+      └──────── Auto Scaling Group ────────┘
 
                 ▲
                 │ SSH
-        Bastion Host (Public Subnet)
+          Bastion Host
+         (Public Subnet)
 ```
 
 ---
 
-## ☁️ AWS Services Used
+# 📋 Project Workflow
 
-- Amazon VPC
-- Public & Private Subnets
-- Internet Gateway
-- NAT Gateway
-- Route Tables
-- EC2
-- Launch Template
-- Auto Scaling Group
-- Application Load Balancer (ALB)
-- Target Group
-- Bastion Host
-- Security Groups
+## Step 1: Create VPC
 
----
+Create a VPC using **VPC and More**
 
-# Step 1: Create VPC
+Configuration
 
-Create a VPC using **VPC and More**.
-
-### Configuration
-
-- Project Name
 - 2 Availability Zones
 - 2 Public Subnets
 - 2 Private Subnets
 - 1 NAT Gateway per Availability Zone
-- No VPC Endpoints
+- Internet Gateway
+- Route Tables
 
 ---
 
-# Step 2: Create Launch Template
+## Step 2: Create Launch Template
 
-Launch Template Configuration
+Create a Launch Template with
 
-- Ubuntu Server
-- Instance Type
+- Ubuntu EC2
 - Key Pair
 - Security Group
 
-### Security Group
+Security Group
 
-Inbound Rules
-
-| Type | Port |
+| Rule | Port |
 |------|------|
 | SSH | 22 |
 | Custom TCP | 8000 |
 
 ---
 
-# Step 3: Create Auto Scaling Group
+## Step 3: Create Auto Scaling Group
 
 Configuration
 
+- Desired Capacity = 2
+- Minimum Capacity = 1
+- Maximum Capacity = 4
+
+Choose
+
 - Launch Template
-- Private Subnets (AZ-1 & AZ-2)
-
-Capacity
-
-- Desired Capacity : 2
-- Minimum Capacity : 1
-- Maximum Capacity : 4
+- VPC
+- Private Subnets
 
 ---
 
-# Step 4: Create Bastion Host
+## Step 4: Create Bastion Host
 
-Launch one EC2 instance in the Public Subnet.
+Launch one Ubuntu EC2 inside Public Subnet.
+
+Enable
+
+- Auto Assign Public IP
 
 Security Group
 
-| Type | Port |
+| Rule | Port |
 |------|------|
 | SSH | 22 |
 
-Enable **Auto Assign Public IP**.
-
 ---
 
-## Copy PEM File to Bastion
+## Copy PEM file
 
 ```bash
-scp -i malla.pem malla.pem ubuntu@<Bastion-Public-IP>:/home/ubuntu/
+scp -i malla.pem malla.pem ubuntu@<bastion-public-ip>:/home/ubuntu/
 ```
 
 SSH into Bastion
 
 ```bash
-ssh -i malla.pem ubuntu@<Bastion-Public-IP>
+ssh -i malla.pem ubuntu@<bastion-public-ip>
 ```
 
-Give Permission
+Give permission
 
 ```bash
 chmod 600 malla.pem
@@ -143,38 +166,30 @@ chmod 600 malla.pem
 SSH into Private EC2
 
 ```bash
-ssh -i malla.pem ubuntu@<Private-IP>
+ssh -i malla.pem ubuntu@<private-ip>
 ```
 
 ---
 
-# Step 5: Deploy Web Application
-
-Create a directory
-
-```bash
-mkdir website
-```
-
-Move into directory
-
-```bash
-cd website
-```
+## Step 5: Deploy Web Application
 
 Create HTML file
 
 ```bash
+mkdir website
+
+cd website
+
 vi index.html
 ```
 
-Paste the following code
+Paste
 
 ```html
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AWS Project</title>
+<title>AWS Project</title>
 </head>
 
 <body>
@@ -184,16 +199,11 @@ Paste the following code
 <p>My second paragraph.</p>
 
 </body>
+
 </html>
 ```
 
-Save and Exit
-
-```
-:wq
-```
-
-Run Python HTTP Server
+Start Python HTTP Server
 
 ```bash
 python3 -m http.server 8000
@@ -207,46 +217,44 @@ curl localhost:8000
 
 ---
 
-# Step 6: Create Application Load Balancer
+## Step 6: Create Application Load Balancer
 
-Type
+Create
 
-- Internet Facing
+- Internet Facing ALB
 
-Network Mapping
+Choose
 
-- Public Subnet AZ-1
-- Public Subnet AZ-2
+- Public Subnet 1
+- Public Subnet 2
 
 Security Group
 
-Allow
-
-| Type | Port |
+| Rule | Port |
 |------|------|
 | HTTP | 80 |
 | Custom TCP | 8000 |
 
 ---
 
-# Step 7: Create Target Group
+## Step 7: Create Target Group
 
 Configuration
 
-- Target Type : Instance
-- Protocol : HTTP
-- Port : 8000
+- Target Type = Instance
+- Protocol = HTTP
+- Port = 8000
 
-Register Targets
+Register
 
-- Private EC2 Instance (AZ-1)
-- Private EC2 Instance (AZ-2)
+- Private EC2 Instance 1
+- Private EC2 Instance 2
 
-Wait until both targets become **Healthy**.
+Wait until both become **Healthy**.
 
 ---
 
-# Step 8: Configure Listener
+## Step 8: Configure Listener
 
 Listener
 
@@ -254,25 +262,23 @@ Listener
 HTTP : 80
 ```
 
-Forward requests to
+Forward traffic to
 
 ```
-Target Group (Port 8000)
+Target Group : Port 8000
 ```
 
 ---
 
-# Step 9: Test the Application
+## Step 9: Test Application
 
-Copy the DNS name of the Load Balancer.
+Copy the DNS name of the Load Balancer
 
-Example
-
-```text
-http://ff-lb-xxxxxxxx.ap-south-1.elb.amazonaws.com
+```
+http://<load-balancer-dns>
 ```
 
-Expected Output
+Output
 
 ```
 My First Heading
@@ -282,9 +288,9 @@ My second paragraph.
 
 ---
 
-## 🔐 Security Groups
+# 🔒 Security Groups
 
-### Bastion Host
+## Bastion Host
 
 | Protocol | Port | Source |
 |----------|------|--------|
@@ -292,7 +298,7 @@ My second paragraph.
 
 ---
 
-### Load Balancer
+## Load Balancer
 
 | Protocol | Port | Source |
 |----------|------|--------|
@@ -301,7 +307,7 @@ My second paragraph.
 
 ---
 
-### Private EC2
+## Private EC2
 
 | Protocol | Port | Source |
 |----------|------|--------|
@@ -310,53 +316,54 @@ My second paragraph.
 
 ---
 
-## 📁 Project Structure
+# 📁 Project Structure
 
 ```text
-AWS-Highly-Available-Web-App/
+aws-highly-available-web-app
 │
 ├── README.md
 ├── index.html
-└── architecture.png
+│
+└── images
+    ├── architecture-diagram.png
+    └── vpc-resource-map.png
 ```
 
 ---
 
-## 🚀 Features
+# 🎯 Key Features
 
 - Custom VPC
 - Public & Private Subnets
-- Bastion Host
 - NAT Gateway
-- Launch Template
+- Bastion Host
 - Auto Scaling Group
+- Launch Template
 - Application Load Balancer
 - Target Group
 - High Availability
 - Fault Tolerance
 - Secure SSH Access
-- Python HTTP Server
 
 ---
 
-## 📚 Learning Outcomes
+# 📚 Learning Outcomes
 
-- VPC Design
+- AWS VPC
 - Route Tables
 - Internet Gateway
 - NAT Gateway
-- Security Groups
-- Bastion Host
+- EC2
 - Launch Templates
 - Auto Scaling
+- Bastion Host
 - Application Load Balancer
 - Target Groups
 - High Availability Architecture
-- Hosting Static Websites on EC2
 
 ---
 
-## 👨‍💻 Author
+# 👨‍💻 Author
 
 **Furqan Mulla**
 
