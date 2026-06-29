@@ -11,6 +11,7 @@ This project demonstrates how to deploy a **Highly Available Web Application** o
 <p align="center">
   <img src="architecture-diagram.png.png" width="1000"/>
 </p>
+
 ---
 
 ## 🌐 VPC Resource Map
